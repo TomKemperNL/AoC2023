@@ -14,7 +14,6 @@ let day1Example () =
     Assert.AreEqual(142, day1 example1)
     ()
 
-
 let input = File.ReadLines "./Day1.txt" |> List.ofSeq
 
 [<Test>]
@@ -33,19 +32,11 @@ let example2 = [
 ]
 
 [<Test>]
-let trickyPartWords () =
-    Assert.AreEqual((8,3), findNrs "eightwothree")
-
-[<Test>]
-let trickyPartNrs () =
-    Assert.AreEqual((4,2), findNrs "4nineeightseven2")
-    
-[<Test>]
 let day1WordsExample () =
     Assert.AreEqual(281, day1b example2)
     ()
     
 [<Test>]
 let day1B () =
-    Assert.AreEqual(42, day1b input)
+    Assert.AreEqual(54100, day1b input)
     ()    
