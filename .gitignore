@@ -1,1 +1,6 @@
-/target
+bin
+obj
+
+.fake
+.idea
+*.user
