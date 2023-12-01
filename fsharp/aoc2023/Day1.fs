@@ -1,14 +1,8 @@
 ﻿module aoc2023.Day1
 
 open System.Text.RegularExpressions
+open Shared
 
-
-
-let numbers (word: string) : int list=
-    let matches = List.ofSeq (Regex.Matches(word, "\\d"))    
-    List.map (fun (m: Match) -> m.Value) matches
-    |> List.map int
-    
 
 let replacements =
     [
@@ -23,35 +17,74 @@ let replacements =
         ("nine", 9)        
     ]
    
-let replaceNrs (word: string) : string =     
+   
+let findNr word =
+    let candidates = Map.ofList replacements
     
-    let replaceAll w =
-        let replace (w:string) (t,r) : string =
-            w.Replace(t, string(r))    
-        List.fold replace w replacements    
-    
-    let rec replaceLeft gathered word =
-        match word with
-        | "" ->
-            gathered
+    let rec findRec gathered toScan =
+        match toScan with
+        | "" -> 0
         | _ ->
-            let rest = word.Substring(1)
-            let ch = word.Substring(0,1)
-            replaceLeft (replaceAll (gathered + ch)) rest
-    
-    replaceLeft "" word
-    
-    
+            let next = toScan.Substring(0,1)            
+            match next with    
+            | ParseRegex "(\\d)" [d] ->
+                int d
+            | _ ->
+                let rest = toScan.Substring(1)
+                let gatheredNew = gathered + next
+                
+                let found = Seq.tryFind (fun (c: string) -> gatheredNew.Contains(c)) (Map.keys candidates)
+                match found with
+                | Some c -> Map.find c candidates
+                | None ->
+                    findRec gatheredNew rest                    
+    findRec "" word
 
-let firstLast nrs =
-    (List.head nrs, List.head (List.rev nrs)) //Performance Shmerformance
+let findNrRight (word: string) =
+    let candidates = Map.ofList replacements
+    
+    let rec findRec gathered toScan =
+        match toScan with
+        | "" -> 0
+        | _ ->
+            let next = toScan.Substring(0,1)            
+            match next with    
+            | ParseRegex "(\\d)" [d] ->
+                (int d)
+            | _ ->
+                let rest = toScan.Substring(1)
+                let gatheredNew = next + gathered 
+                
+                let found = Seq.tryFind (fun (c: string) -> gatheredNew.Contains(c)) (Map.keys candidates)
+                match found with
+                | Some c -> (Map.find c candidates)
+                | None ->
+                    findRec gatheredNew rest
+                    
+    let reverted = word.ToCharArray() |> Array.rev |> System.String
+    
+    findRec "" reverted         
+    
+   
+
+let findNrs word =
+    (findNr word, findNrRight word)
 
 let toNr (left, right) = 10 * left + right
 
 let day1 lines =
-    List.map (numbers >> firstLast >> toNr) lines
+    List.map (findNrs >> toNr) lines
     |> List.sum
 
 let day1b lines =
-    List.map (replaceNrs >> numbers >> firstLast >> toNr) lines
-    |> List.sum
+    let nrs = List.map (findNrs >> toNr) lines
+    
+    printfn "%A" nrs
+    
+    let pluslog total nr =
+        printfn "Total: %d" (total + nr)
+        total + nr
+    
+    List.fold pluslog 0 nrs
+    
+    

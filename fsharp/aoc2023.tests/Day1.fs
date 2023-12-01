@@ -30,13 +30,15 @@ let example2 = [
     "4nineeightseven2"
     "zoneight234"
     "7pqrstsixteen"
-]    
-    
+]
+
 [<Test>]
-let trickyPart () =
-    Assert.AreEqual("8wo3", replaceNrs "eightwothree")
-    Assert.AreEqual("7pqrst6teen", replaceNrs "7pqrstsixteen")
-    ()    
+let trickyPartWords () =
+    Assert.AreEqual((8,3), findNrs "eightwothree")
+
+[<Test>]
+let trickyPartNrs () =
+    Assert.AreEqual((4,2), findNrs "4nineeightseven2")
     
 [<Test>]
 let day1WordsExample () =
@@ -45,5 +47,5 @@ let day1WordsExample () =
     
 [<Test>]
 let day1B () =
-    Assert.AreNotEqual(54095, day1b input)
+    Assert.AreEqual(42, day1b input)
     ()    
