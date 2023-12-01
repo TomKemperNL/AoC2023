@@ -22,11 +22,26 @@ let replacements =
         ("eight", 8)
         ("nine", 9)        
     ]
+   
+let replaceNrs (word: string) : string =     
     
-let replaceNrs (word: string) : string =
-    let replace (w:string) (t,r) : string =
-        w.Replace(t, string(r))    
-    List.fold replace word replacements
+    let replaceAll w =
+        let replace (w:string) (t,r) : string =
+            w.Replace(t, string(r))    
+        List.fold replace w replacements    
+    
+    let rec replaceLeft gathered word =
+        match word with
+        | "" ->
+            gathered
+        | _ ->
+            let rest = word.Substring(1)
+            let ch = word.Substring(0,1)
+            replaceLeft (replaceAll (gathered + ch)) rest
+    
+    replaceLeft "" word
+    
+    
 
 let firstLast nrs =
     (List.head nrs, List.head (List.rev nrs)) //Performance Shmerformance
@@ -37,6 +52,6 @@ let day1 lines =
     List.map (numbers >> firstLast >> toNr) lines
     |> List.sum
 
-let day1b lines =    
+let day1b lines =
     List.map (replaceNrs >> numbers >> firstLast >> toNr) lines
     |> List.sum
