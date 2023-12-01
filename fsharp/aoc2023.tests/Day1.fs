@@ -21,3 +21,23 @@ let input = File.ReadLines "./Day1.txt" |> List.ofSeq
 let day1A () =
     Assert.AreEqual(42, day1 input)
     ()
+
+let example2 = [
+    "two1nine"
+    "eightwothree"
+    "abcone2threexyz"
+    "xtwone3four"
+    "4nineeightseven2"
+    "zoneight234"
+    "7pqrstsixteen"
+]    
+    
+[<Test>]
+let trickyPart () =
+    Assert.AreEqual("8wo3", replaceNrs "eightwothree")
+    ()    
+    
+[<Test>]
+let day1WordsExample () =
+    Assert.AreEqual(281, day1b example2)
+    ()
