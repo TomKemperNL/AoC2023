@@ -13,3 +13,9 @@ let (|ParseRegex|_|) regex str =
         Some(List.tail [ for x in m.Groups -> x.Value ])
     else
         None
+
+module Map =
+    let findOrElse ifNone key map =
+        match Map.tryFind key map with
+        | None -> ifNone
+        | Some item -> item
