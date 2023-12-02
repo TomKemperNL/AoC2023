@@ -45,3 +45,15 @@ let day2AExample () =
 let day2A () =
     let games = List.map parse input |> List.choose id
     Assert.AreEqual(3035, day2a games)
+    
+
+[<Test>]
+let day2BExample () =    
+   let games = List.map parse exampleInput |> List.choose id
+   Assert.AreEqual(2286, day2b games)
+   
+
+[<Test>]
+let day2B () =
+    let games = List.map parse input |> List.choose id
+    Assert.AreEqual(66027, day2b games)   

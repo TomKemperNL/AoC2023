@@ -46,6 +46,20 @@ let bagAcceptsPull (bag: Bag) (pull: Pull) =
 let bagAcceptsGame (bag: Bag) (game: Game) =
     let _, pulls = game
     List.forall (bagAcceptsPull bag) pulls
+    
+let power (bag: Bag) : int =
+    bag.blue * bag.green * bag.red
+
+let minPull (pullA: Bag) (pullB: Pull) =
+    {
+        red = if pullB.red > pullA.red then pullB.red else pullA.red
+        green = if pullB.green > pullA.green then pullB.green else pullA.green
+        blue = if pullB.blue > pullA.blue then pullB.blue else pullA.blue
+    }
+    
+let minBag (game: Game) : Bag = 
+    let _, pulls = game
+    List.fold minPull { red=0;green=0;blue=0; } pulls
 
 let day2a (games: Game list) =
     let bag = { red = 12; green = 13; blue = 14 }
@@ -53,3 +67,8 @@ let day2a (games: Game list) =
     List.filter (bagAcceptsGame bag) games
         |> List.map fst
         |> List.sum
+        
+let day2b (games: Game list) =    
+    List.map minBag games
+    |> List.map power
+    |> List.sum
