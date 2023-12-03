@@ -14,8 +14,11 @@ let (|ParseRegex|_|) regex str =
     else
         None
 
+let digits = "123456789".ToCharArray() |> List.ofArray
+
 module Map =
     let findOrElse ifNone key map =
         match Map.tryFind key map with
         | None -> ifNone
         | Some item -> item
+        
