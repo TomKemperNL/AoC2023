@@ -27,6 +27,16 @@ let day3a () =
     Assert.AreEqual(532428, day3a input)
     ()    
 
+[<Test>]
+let day3bExample () =
+    Assert.AreEqual(467835, day3b exampleInput)
+    ()
+    
+[<Test>]
+let day3b () =
+    Assert.AreEqual(84051670, day3b input)
+    ()
+    
 //let chars = Array.map (fun (s: string) -> s.ToCharArray()) input
 //let symbols  = Array.collect id chars |> Array.distinct
 //
