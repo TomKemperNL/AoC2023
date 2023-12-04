@@ -24,12 +24,39 @@ let parse (line: string) : Card =
     | _ ->
         failwith (sprintf "cannot parse %s" line)
         
-let score (card: Card) : int =
+let matches (card: Card) : int = 
     let _, winners, numbers = card
-    let overlapping = Set.intersect winners numbers |> Set.count
+    Set.intersect winners numbers |> Set.count
     
+let score (card: Card) : int =
+    let overlapping = matches card    
     2.0 ** (overlapping - 1 |> float) |> int
     
 let day4a (cards: Card list) =
     List.map score cards |> List.sum
+    
+
+let rec addCards depth times nrWithCards =
+    match depth with
+    | 0 -> nrWithCards
+    | d ->
+        let (nr, card) :: rest = nrWithCards        
+        (nr + times, card) :: (addCards (d-1) times rest)
+
+let rec countCards cardsWithNrs =
+    match cardsWithNrs with
+    | [] -> 0
+    | (nr, card) :: rest ->
+        let nrOfMatches = (matches card) 
+        let newRest = addCards nrOfMatches nr rest
+        nr + countCards newRest
+    
+let day4b (cards: Card list) =
+    let bunchOfOnes = List.init (List.length cards) (fun _ -> 1)
+    let nrWithCard = List.zip bunchOfOnes cards
+    countCards nrWithCard
+    
+    
+    
+    
     

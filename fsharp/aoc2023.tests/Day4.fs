@@ -19,4 +19,14 @@ let day4aExampleTest () =
 
 [<Test>]    
 let day4a () =
-    Assert.AreEqual(28538, day4a (Array.map parse input |> List.ofArray))    
+    Assert.AreEqual(28538, day4a (Array.map parse input |> List.ofArray))
+    
+
+[<Test>]
+let day4bExampleTest () =
+    Assert.AreEqual(30, day4b (Array.map parse example |> List.ofArray))
+
+[<Test>]    
+let day4b () =
+    Assert.AreEqual(9425061, day4b (Array.map parse input |> List.ofArray))
+        
