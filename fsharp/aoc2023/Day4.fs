@@ -37,11 +37,14 @@ let day4a (cards: Card list) =
     
 
 let rec addCards depth times nrWithCards =
-    match depth with
-    | 0 -> nrWithCards
-    | d ->
-        let (nr, card) :: rest = nrWithCards        
-        (nr + times, card) :: (addCards (d-1) times rest)
+    match nrWithCards with
+    | [] -> 
+        []
+    | (nr, card) :: rest ->
+        match depth with
+        | 0 -> nrWithCards
+        | d ->            
+            (nr + times, card) :: (addCards (d-1) times rest)
 
 let rec countCards cardsWithNrs =
     match cardsWithNrs with
