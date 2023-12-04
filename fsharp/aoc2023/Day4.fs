@@ -1,0 +1,35 @@
+﻿module aoc2023.Day4
+
+open System
+open Shared
+open aoc2023
+
+type Card = int * Set<int> * Set<int>
+
+let parse (line: string) : Card =
+    match line with
+    | ParseRegex "Card\s+(\d+): (.+) \| (.+)" [nr; winningStr; nrStr] ->
+        
+        let parseNrs (txt: string) =
+            txt.Trim().Split(" ")
+                |> Array.map (fun s -> s.Trim())
+                |> Array.filter (fun s -> (not (System.String.IsNullOrWhiteSpace(s))))
+//                |> Array.map (fun s -> printfn "%s" s;s)
+                |> Array.map int
+                |> Set.ofArray
+        
+        let winningNrs = parseNrs winningStr
+        let nrs = parseNrs nrStr
+        (int nr, winningNrs, nrs)
+    | _ ->
+        failwith (sprintf "cannot parse %s" line)
+        
+let score (card: Card) : int =
+    let _, winners, numbers = card
+    let overlapping = Set.intersect winners numbers |> Set.count
+    
+    2.0 ** (overlapping - 1 |> float) |> int
+    
+let day4a (cards: Card list) =
+    List.map score cards |> List.sum
+    
