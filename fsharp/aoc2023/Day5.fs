@@ -25,7 +25,7 @@ let namesOfKinds =
     Array.zip (Array.map (fun (s: UnionCaseInfo) -> s.Name.ToLower()) cases) values
     |> Map.ofArray
 
-type Item = (int64 * ItemKind)
+type Item = (int64)
 
 
 type AlmanacMapping =
@@ -93,18 +93,18 @@ let parse lines : Input =
           CurrentTo = None }
         lines
 
-let processItems nextKind (mappings: AlmanacMapping list) (items: Item list) : Item list=    
-    let inRange (nr, _) (mapping: AlmanacMapping)  =
+let processItems (mappings: AlmanacMapping list) (items: Item list) : Item list=    
+    let inRange nr (mapping: AlmanacMapping) =
         nr >= mapping.SourceRangeStart && nr <= mapping.SourceRangeStart + mapping.RangeLength - 1L
     
-    let processItem item =
-        let (nr, _) = item
+    let processItem item : Item =
+        let nr : int64 = item
         let matchingMapping = List.tryFind (inRange item) mappings
         match matchingMapping with
         | None -> 
-            (nr, nextKind)
+            (nr)
         | Some m ->
-            (nr - m.SourceRangeStart) + m.DestinationRangeStart, nextKind
+            (nr - m.SourceRangeStart) + m.DestinationRangeStart
         
     List.map processItem items
 
@@ -119,12 +119,12 @@ let day5a (almanac: Input) =
         | Location -> input
         | _ ->
             let currentMapping, nextKind = getMappingGroup current
-            let newInput = processItems nextKind currentMapping input
+            let newInput = processItems currentMapping input
             processMapping newInput nextKind
 
-    let startingItems : Item list= List.map (fun (StartingSeed s) -> (s, Seed)) almanac.Seeds            
+    let startingItems : Item list= List.map (fun (StartingSeed s) -> (s)) almanac.Seeds            
     let mapped = processMapping startingItems Seed
-    List.minBy fst mapped |> fst
+    List.min mapped
 
 type ItemRange = int64 * int64
 
