@@ -40,6 +40,7 @@ humidity-to-location map:
 [<Test>]
 let day5AExample () =    
     Assert.AreEqual(35, day5a (parse example) )
+    ()
 
 let input =
     File.ReadLines "./Day5.txt" |> Seq.toList
@@ -47,11 +48,31 @@ let input =
 [<Test>]
 let day5A () =    
     Assert.AreEqual(3374647L, day5a (parse input) )
-
-[<Test>]
-let processRangeMappingBefore =
     ()
+
     
 [<Test>]
 let day5BExample () =    
     Assert.AreEqual(46, day5b (parse example) )
+    
+    
+[<Test>]
+let wut () =
+    let returnEmpty () : int64 list=
+        []
+    
+    Assert.AreEqual([], returnEmpty ())
+    ()
+    
+[<Test>]
+let processRangeMappingBefore () =
+    let rangeMapping = {
+        SourceRangeStart = 10
+        DestinationRangeStart = 20
+        RangeLength = 2
+    }
+    let result = processRange rangeMapping (2,2)
+    
+    Assert.AreEqual([], result)
+    ()
+    

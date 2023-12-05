@@ -28,10 +28,14 @@ let namesOfKinds =
 type Item = (int64)
 
 
+type RangeMapping = {
+    DestinationRangeStart: int64
+    SourceRangeStart: int64
+    RangeLength: int64
+}
+
 type AlmanacMapping =
-    { DestinationRangeStart: int64
-      SourceRangeStart: int64
-      RangeLength: int64
+    { RangeMapping : RangeMapping
       From: ItemKind
       To: ItemKind }
 
@@ -77,9 +81,11 @@ let parse lines : Input =
                 parseR newSofar t
             | ParseRegex "(\\d+) (\\d+) (\\d+)" [ destStart; sourceStart; length ] ->
                 let newMapping =
-                    { DestinationRangeStart = (int64 destStart)
-                      SourceRangeStart = (int64 sourceStart)
-                      RangeLength = (int64 length)
+                    { RangeMapping = {
+                          DestinationRangeStart = (int64 destStart)
+                          SourceRangeStart = (int64 sourceStart)
+                          RangeLength = (int64 length)
+                      }
                       From = sofar.CurrentFrom |> Option.get
                       To = sofar.CurrentTo |> Option.get }
 
@@ -95,7 +101,7 @@ let parse lines : Input =
 
 let processItems (mappings: AlmanacMapping list) (items: Item list) : Item list=    
     let inRange nr (mapping: AlmanacMapping) =
-        nr >= mapping.SourceRangeStart && nr <= mapping.SourceRangeStart + mapping.RangeLength - 1L
+        nr >= mapping.RangeMapping.SourceRangeStart && nr <= mapping.RangeMapping.SourceRangeStart + mapping.RangeMapping.RangeLength - 1L
     
     let processItem item : Item =
         let nr : int64 = item
@@ -104,7 +110,7 @@ let processItems (mappings: AlmanacMapping list) (items: Item list) : Item list=
         | None -> 
             (nr)
         | Some m ->
-            (nr - m.SourceRangeStart) + m.DestinationRangeStart
+            (nr - m.RangeMapping.SourceRangeStart) + m.RangeMapping.DestinationRangeStart
         
     List.map processItem items
 
@@ -128,12 +134,19 @@ let day5a (almanac: Input) =
 
 type ItemRange = int64 * int64
 
-let processRange (mapping: AlmanacMapping) (item: ItemRange) : ItemRange list =
-    []
+let processRange (mapping: RangeMapping) ((start, length): ItemRange) : ItemRange list =
+    let isBefore =
+        start + length - 1L < mapping.RangeLength
+    
+    if isBefore then
+        []        
+    else
+        []
+    
 
 let processRanges (mappings: AlmanacMapping list) (items: ItemRange list) : ItemRange list =
     let processMappings item : ItemRange list =
-        List.collect (fun mapping -> processRange mapping item) mappings        
+        List.collect (fun mapping -> processRange mapping item) (List.map (fun bigMapping -> bigMapping.RangeMapping) mappings)        
     List.collect processMappings items
 
 let day5b (almanac: Input) =
