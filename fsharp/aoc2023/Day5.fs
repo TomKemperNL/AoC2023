@@ -3,7 +3,7 @@
 open Microsoft.FSharp.Reflection
 open Shared
 
-type StartingSeed = StartingSeed of int
+type StartingSeed = StartingSeed of int64
 
 type ItemKind = //Not necessary, but lets pretend the domain matters...
     | Seed
@@ -25,13 +25,13 @@ let namesOfKinds =
     Array.zip (Array.map (fun (s: UnionCaseInfo) -> s.Name.ToLower()) cases) values
     |> Map.ofArray
 
-type Item = (int * ItemKind)
+type Item = (int64 * ItemKind)
 
 
 type AlmanacMapping =
-    { DestinationRangeStart: int
-      SourceRangeStart: int
-      RangeLength: int
+    { DestinationRangeStart: int64
+      SourceRangeStart: int64
+      RangeLength: int64
       From: ItemKind
       To: ItemKind }
 
@@ -41,7 +41,7 @@ type Input =
       Mappings: AlmanacMapping list }
 
 type ParseResult =
-    { Seeds: int list
+    { Seeds: int64 list
       CurrentFrom: ItemKind option
       CurrentTo: ItemKind option
       Mappings: AlmanacMapping list }
@@ -58,7 +58,7 @@ let parse lines : Input =
             | ParseRegex "seeds: (.+)" [ seednrsString ] ->
                 let seedNrs =
                     seednrsString.Split(" ")
-                    |> Array.map int
+                    |> Array.map int64
                     |> List.ofArray
 
                 let newSofar =
@@ -77,9 +77,9 @@ let parse lines : Input =
                 parseR newSofar t
             | ParseRegex "(\\d+) (\\d+) (\\d+)" [ destStart; sourceStart; length ] ->
                 let newMapping =
-                    { DestinationRangeStart = (int destStart)
-                      SourceRangeStart = (int sourceStart)
-                      RangeLength = (int length)
+                    { DestinationRangeStart = (int64 destStart)
+                      SourceRangeStart = (int64 sourceStart)
+                      RangeLength = (int64 length)
                       From = sofar.CurrentFrom |> Option.get
                       To = sofar.CurrentTo |> Option.get }
 
@@ -95,7 +95,7 @@ let parse lines : Input =
 
 let processItems nextKind (mappings: AlmanacMapping list) (items: Item list) : Item list=    
     let inRange (nr, _) (mapping: AlmanacMapping)  =
-        nr >= mapping.SourceRangeStart && nr <= mapping.SourceRangeStart + mapping.RangeLength - 1
+        nr >= mapping.SourceRangeStart && nr <= mapping.SourceRangeStart + mapping.RangeLength - 1L
     
     let processItem item =
         let (nr, _) = item
