@@ -38,9 +38,12 @@ humidity-to-location map:
 56 93 4"""      .Split("\n") |> Array.toList
 
 [<Test>]
-let day5AExample () =
-    namesOfKinds
+let day5AExample () =    
     Assert.AreEqual(35, day5a (parse example) )
 
 let input =
-    File.ReadLines "./Day5.txt" |> Array.ofSeq
+    File.ReadLines "./Day5.txt" |> Seq.toList
+
+[<Test>]
+let day5A () =    
+    Assert.AreEqual(0, day5a (parse input) )    

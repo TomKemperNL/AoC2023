@@ -38,7 +38,7 @@ type AlmanacMapping =
 
 type Input =
     { Seeds: StartingSeed list
-      Mapping: AlmanacMapping list }
+      Mappings: AlmanacMapping list }
 
 type ParseResult =
     { Seeds: int list
@@ -51,7 +51,7 @@ let parse lines : Input =
         match lines with
         | [] ->
             { Seeds = List.map StartingSeed sofar.Seeds
-              Mapping = sofar.Mappings }
+              Mappings = sofar.Mappings }
         | (h :: t) ->
             match h with
             | _ when System.String.IsNullOrEmpty(h.Trim()) -> parseR sofar t
@@ -93,6 +93,35 @@ let parse lines : Input =
           CurrentTo = None }
         lines
 
+let processItems nextKind (mappings: AlmanacMapping list) (items: Item list) : Item list=    
+    let inRange (nr, _) (mapping: AlmanacMapping)  =
+        nr >= mapping.SourceRangeStart && nr <= mapping.SourceRangeStart + mapping.RangeLength - 1
+    
+    let processItem item =
+        let (nr, _) = item
+        let matchingMapping = List.tryFind (inRange item) mappings
+        match matchingMapping with
+        | None -> 
+            (nr, nextKind)
+        | Some m ->
+            (nr - m.SourceRangeStart) + m.DestinationRangeStart, nextKind
+        
+    List.map processItem items
 
-let day5a almanac =
-    42
+let day5a (almanac: Input) =
+    let grouped = List.groupBy (fun (m: AlmanacMapping) -> (m.From, m.To )) almanac.Mappings |> Map.ofList
+    let getMappingGroup kind =
+        let (f,t) = Map.findKey (fun (from,_) v -> kind = from) grouped
+        (Map.find (f,t) grouped), t
+        
+    let rec processMapping input current =
+        match current with
+        | Location -> input
+        | _ ->
+            let currentMapping, nextKind = getMappingGroup current
+            let newInput = processItems nextKind currentMapping input
+            processMapping newInput nextKind
+
+    let startingItems : Item list= List.map (fun (StartingSeed s) -> (s, Seed)) almanac.Seeds            
+    let mapped = processMapping startingItems Seed
+    List.minBy fst mapped |> fst
