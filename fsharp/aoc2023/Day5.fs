@@ -125,3 +125,39 @@ let day5a (almanac: Input) =
     let startingItems : Item list= List.map (fun (StartingSeed s) -> (s, Seed)) almanac.Seeds            
     let mapped = processMapping startingItems Seed
     List.minBy fst mapped |> fst
+
+type ItemRange = int64 * int64
+
+let processRange (mapping: AlmanacMapping) (item: ItemRange) : ItemRange list =
+    []
+
+let processRanges (mappings: AlmanacMapping list) (items: ItemRange list) : ItemRange list =
+    let processMappings item : ItemRange list =
+        List.collect (fun mapping -> processRange mapping item) mappings        
+    List.collect processMappings items
+
+let day5b (almanac: Input) =
+    let rec takePairs items =
+        match items with
+        | [] -> []
+        | [ _ ] -> failwith "odd number of items"
+        | h1 :: h2 :: t ->
+            (h1,h2) :: takePairs t
+    
+    let startingItems : ItemRange list = takePairs (List.map (fun (StartingSeed n) -> n) almanac.Seeds)
+    
+    let grouped = List.groupBy (fun (m: AlmanacMapping) -> (m.From, m.To )) almanac.Mappings |> Map.ofList
+    let getMappingGroup kind =
+        let (f,t) = Map.findKey (fun (from,_) v -> kind = from) grouped
+        (Map.find (f,t) grouped), t
+        
+    let rec processMapping input current =
+        match current with
+        | Location -> input
+        | _ ->
+            let currentMapping, nextKind = getMappingGroup current
+            let newInput = processRanges currentMapping input
+            processMapping newInput nextKind
+
+    let resultingRanges = processMapping startingItems Seed
+    List.minBy fst resultingRanges |> fst

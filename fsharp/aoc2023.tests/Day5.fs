@@ -46,4 +46,12 @@ let input =
 
 [<Test>]
 let day5A () =    
-    Assert.AreEqual(3374647L, day5a (parse input) )    
+    Assert.AreEqual(3374647L, day5a (parse input) )
+
+[<Test>]
+let processRangeMappingBefore =
+    ()
+    
+[<Test>]
+let day5BExample () =    
+    Assert.AreEqual(46, day5b (parse example) )
