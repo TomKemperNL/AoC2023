@@ -141,18 +141,18 @@ let rec processRange (mapping: RangeMapping) ((start, length): ItemRange) : Item
         [(start,length)] //Completely after
     else if start < mapping.SourceRangeStart then //Overlap Front
         let firstRangeStart = start
-        let firstRangeLength = (mapping.SourceRangeStart - start - 1L)
+        let firstRangeLength = (mapping.SourceRangeStart - start)
         let secondRangeLength = length - firstRangeLength
         let secondRangeStart = mapping.DestinationRangeStart
         
         (firstRangeStart, firstRangeLength) :: processRange mapping (secondRangeStart, secondRangeLength)
-    else if (start + length) < (mapping.SourceRangeStart + mapping.RangeLength) then //Contained
+    else if (start + length) <= (mapping.SourceRangeStart + mapping.RangeLength) then //Contained
         let offset = start - mapping.SourceRangeStart
         [(mapping.DestinationRangeStart + offset, length)]
     else //Overlap after
         let offset = start - mapping.SourceRangeStart
         let firstRangeStart = mapping.DestinationRangeStart + offset
-        let firstRangeLength = mapping.RangeLength - offset + 1L
+        let firstRangeLength = mapping.RangeLength - offset
         let secondRangeStart = mapping.SourceRangeStart + mapping.RangeLength
         let secondRangeLength = length - firstRangeLength
         

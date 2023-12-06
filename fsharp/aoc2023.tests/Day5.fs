@@ -55,24 +55,32 @@ let day5A () =
 let day5BExample () =    
     Assert.AreEqual(46, day5b (parse example) )
     
-    
 [<Test>]
-let wut () =
-    let returnEmpty () : int64 list=
-        []
-    
-    Assert.AreEqual([], returnEmpty ())
-    ()
-    
-[<Test>]
-let processRangeMappingBefore () =
+let processRangeMapping () =
     let rangeMapping = {
         SourceRangeStart = 10
         DestinationRangeStart = 20
-        RangeLength = 2
+        RangeLength = 5
     }
-    let result = processRange rangeMapping (2,2)
+    let result = processRange rangeMapping (2,2)    
+    Assert.AreEqual([(2L,2L)], result)
     
-    Assert.AreEqual([], result)
+    let result = processRange rangeMapping (20, 2)
+    Assert.AreEqual([(20L,2L)], result)        
+    
+    let result = processRange rangeMapping (8, 5)
+    Assert.AreEqual([(8L,2L); (20L,3L)], result)    
+    
+    let result = processRange rangeMapping (13, 2)
+    Assert.AreEqual([(23L,2L)], result)
+    
+    let result = processRange rangeMapping (10, 5)
+    Assert.AreEqual([(20L,5L)], result)    
+    
+    let result = processRange rangeMapping (13, 7)
+    Assert.AreEqual([(23L,2L); (15L,5L)], result)   
     ()
-    
+
+[<Test>]
+let day5B () =    
+    Assert.AreNotEqual(day5b (parse input) , 51914834L)
