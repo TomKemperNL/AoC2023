@@ -1,5 +1,6 @@
 ﻿module aoc2023.Day5
 
+open System.Reflection
 open Microsoft.FSharp.Reflection
 open Shared
 
@@ -132,23 +133,25 @@ let day5a (almanac: Input) =
     let mapped = processMapping startingItems Seed
     List.minBy fst mapped |> fst
 
-type ItemRange = int64 * int64
+type ItemRange = int64 * int64 * ItemKind
 
-let rec processRange (mapping: RangeMapping) ((start, length): ItemRange) : ItemRange list =        
-    if start + length - 1L < mapping.SourceRangeStart then
-        [(start,length)] //Completely in front
+let rec processRange (from, target) (mapping: RangeMapping) ((start, length, kind): ItemRange) : ItemRange list =
+    if kind <> from then
+        [(start,length, kind)] //Inapplicable mapping
+    else if start + length - 1L < mapping.SourceRangeStart then
+        [(start,length, kind)] //Completely in front
     else if start > (mapping.SourceRangeStart + mapping.RangeLength - 1L) then
-        [(start,length)] //Completely after
+        [(start,length, kind)] //Completely after
     else if start < mapping.SourceRangeStart then //Overlap Front
         let firstRangeStart = start
         let firstRangeLength = (mapping.SourceRangeStart - start)
         let secondRangeLength = length - firstRangeLength
         let secondRangeStart = mapping.SourceRangeStart
         
-        (firstRangeStart, firstRangeLength) :: processRange mapping (secondRangeStart, secondRangeLength)
+        (firstRangeStart, firstRangeLength, kind) :: processRange (from, target) mapping (secondRangeStart, secondRangeLength, kind)
     else if (start + length) <= (mapping.SourceRangeStart + mapping.RangeLength) then //Contained
         let offset = start - mapping.SourceRangeStart
-        [(mapping.DestinationRangeStart + offset, length)]
+        [(mapping.DestinationRangeStart + offset, length, target)]
     else //Overlap after
         let offset = start - mapping.SourceRangeStart
         let firstRangeStart = mapping.DestinationRangeStart + offset
@@ -156,15 +159,19 @@ let rec processRange (mapping: RangeMapping) ((start, length): ItemRange) : Item
         let secondRangeStart = mapping.SourceRangeStart + mapping.RangeLength
         let secondRangeLength = length - firstRangeLength
         
-        (firstRangeStart, firstRangeLength) :: processRange mapping (secondRangeStart, secondRangeLength)
+        (firstRangeStart, firstRangeLength, target) :: processRange (from, target) mapping (secondRangeStart, secondRangeLength, from)
     
 
-let processRanges (mappings: AlmanacMapping list) (items: ItemRange list) : ItemRange list =  
+let processRanges (from,target) (mappings: AlmanacMapping list) (items: ItemRange list) : ItemRange list =  
+    
+    
     
     let processMappings items mapping : ItemRange list =
-        List.collect (processRange mapping) items       
+        List.collect (processRange (from,target) mapping) items       
                 
     List.fold processMappings items (List.map (fun m -> m.RangeMapping) mappings)
+    |> List.map (fun (n, l, _) -> (n,l, target)) 
+    
 
 let day5b (almanac: Input) =
     let rec takePairs items =
@@ -174,7 +181,9 @@ let day5b (almanac: Input) =
         | h1 :: h2 :: t ->
             (h1,h2) :: takePairs t
     
-    let startingItems : ItemRange list = takePairs (List.map (fun (StartingSeed n) -> n) almanac.Seeds)
+    let startingItems : ItemRange list =
+        takePairs (List.map (fun (StartingSeed n) -> n) almanac.Seeds)
+        |> List.map (fun (nr, length) -> nr, length, Seed)
     
     let grouped = List.groupBy (fun (m: AlmanacMapping) -> (m.From, m.To )) almanac.Mappings |> Map.ofList
     let getMappingGroup kind =
@@ -186,8 +195,9 @@ let day5b (almanac: Input) =
         | Location -> input
         | _ ->
             let currentMapping, nextKind = getMappingGroup current
-            let newInput = processRanges currentMapping input
+            let newInput = processRanges (current, nextKind) currentMapping input
             processMapping newInput nextKind
 
     let resultingRanges = processMapping startingItems Seed
-    List.minBy fst resultingRanges |> fst
+    let result, _,_ = List.minBy (fun (nr, l, k) -> nr) resultingRanges
+    result 
