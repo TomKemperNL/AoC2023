@@ -134,20 +134,37 @@ let day5a (almanac: Input) =
 
 type ItemRange = int64 * int64
 
-let processRange (mapping: RangeMapping) ((start, length): ItemRange) : ItemRange list =
-    let isBefore =
-        start + length - 1L < mapping.RangeLength
-    
-    if isBefore then
-        []        
-    else
-        []
+let rec processRange (mapping: RangeMapping) ((start, length): ItemRange) : ItemRange list =        
+    if start + length - 1L < mapping.SourceRangeStart then
+        [(start,length)] //Completely in front
+    else if start > (mapping.SourceRangeStart + mapping.RangeLength - 1L) then
+        [(start,length)] //Completely after
+    else if start < mapping.SourceRangeStart then //Overlap Front
+        let firstRangeStart = start
+        let firstRangeLength = (mapping.SourceRangeStart - start - 1L)
+        let secondRangeLength = length - firstRangeLength
+        let secondRangeStart = mapping.DestinationRangeStart
+        
+        (firstRangeStart, firstRangeLength) :: processRange mapping (secondRangeStart, secondRangeLength)
+    else if (start + length) < (mapping.SourceRangeStart + mapping.RangeLength) then //Contained
+        let offset = start - mapping.SourceRangeStart
+        [(mapping.DestinationRangeStart + offset, length)]
+    else //Overlap after
+        let offset = start - mapping.SourceRangeStart
+        let firstRangeStart = mapping.DestinationRangeStart + offset
+        let firstRangeLength = mapping.RangeLength - offset + 1L
+        let secondRangeStart = mapping.SourceRangeStart + mapping.RangeLength
+        let secondRangeLength = length - firstRangeLength
+        
+        (firstRangeStart, firstRangeLength) :: processRange mapping (secondRangeStart, secondRangeLength)
     
 
-let processRanges (mappings: AlmanacMapping list) (items: ItemRange list) : ItemRange list =
-    let processMappings item : ItemRange list =
-        List.collect (fun mapping -> processRange mapping item) (List.map (fun bigMapping -> bigMapping.RangeMapping) mappings)        
-    List.collect processMappings items
+let processRanges (mappings: AlmanacMapping list) (items: ItemRange list) : ItemRange list =  
+    
+    let processMappings items mapping : ItemRange list =
+        List.collect (processRange mapping) items       
+                
+    List.fold processMappings items (List.map (fun m -> m.RangeMapping) mappings)
 
 let day5b (almanac: Input) =
     let rec takePairs items =
