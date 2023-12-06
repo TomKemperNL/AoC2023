@@ -143,7 +143,7 @@ let rec processRange (mapping: RangeMapping) ((start, length): ItemRange) : Item
         let firstRangeStart = start
         let firstRangeLength = (mapping.SourceRangeStart - start)
         let secondRangeLength = length - firstRangeLength
-        let secondRangeStart = mapping.DestinationRangeStart
+        let secondRangeStart = mapping.SourceRangeStart
         
         (firstRangeStart, firstRangeLength) :: processRange mapping (secondRangeStart, secondRangeLength)
     else if (start + length) <= (mapping.SourceRangeStart + mapping.RangeLength) then //Contained

@@ -62,11 +62,17 @@ let processRangeMapping () =
         DestinationRangeStart = 20
         RangeLength = 5
     }
+    let result = processRange rangeMapping (8,2)    
+    Assert.AreEqual([(8L,2L)], result)
+    
     let result = processRange rangeMapping (2,2)    
     Assert.AreEqual([(2L,2L)], result)
     
     let result = processRange rangeMapping (20, 2)
     Assert.AreEqual([(20L,2L)], result)        
+        
+    let result = processRange rangeMapping (15, 2)
+    Assert.AreEqual([(15L,2L)], result)     
     
     let result = processRange rangeMapping (8, 5)
     Assert.AreEqual([(8L,2L); (20L,3L)], result)    
@@ -78,7 +84,10 @@ let processRangeMapping () =
     Assert.AreEqual([(20L,5L)], result)    
     
     let result = processRange rangeMapping (13, 7)
-    Assert.AreEqual([(23L,2L); (15L,5L)], result)   
+    Assert.AreEqual([(23L,2L); (15L,5L)], result)
+    
+    let result = processRange rangeMapping (8, 9)
+    Assert.AreEqual([(8L,2L); (20L,5L); (15L,2L)], result) 
     ()
 
 [<Test>]
