@@ -40,13 +40,6 @@ type HandType = HighCard | OnePair | TwoPair | ThreeOfAKind | FullHouse | FourOf
 
 type Bid = Hand * int
 
-type Comparison = | Equal | Greater | Lesser
-let comparisonToInt comp =
-    match comp with
-    | Equal -> 0
-    | Greater -> 1
-    | Lesser -> -1
-
 let parse line : Bid = 
     match line with 
     | ParseRegex "(.)(.)(.)(.)(.) (\d+)" [a;b;c;d;e;bid] ->
@@ -55,9 +48,10 @@ let parse line : Bid =
         (hand, parsedBid)
     | _ -> failwith (sprintf "cannot parse %s" line)
 
-let categoriseHand ((a,b,c,d,e): Hand) =    
-    let asList = [a;b;c;d;e]  
-    let counts = List.groupBy id asList |> List.map (fun (c, cs) -> (c, List.length cs)) |> List.sortByDescending snd
+let asList ((a,b,c,d,e): Hand) = [a;b;c;d;e]  
+
+let categoriseHand (h: Hand) = 
+    let counts = List.groupBy id (asList h) |> List.map (fun (c, cs) -> (c, List.length cs)) |> List.sortByDescending snd
     match counts with
     | [(c, 5)] -> FiveOfAKind
     | [(c, 4); _ ] -> FourOfAKind
@@ -67,10 +61,19 @@ let categoriseHand ((a,b,c,d,e): Hand) =
     | (c, 2) :: _ -> OnePair
     | _ -> HighCard
     
-
 let compareHand h1 h2 =
-    0
+    let compare = Microsoft.FSharp.Core.Operators.compare    
+    match compare (categoriseHand h1) (categoriseHand h2) with
+    | n when n < 0 -> -1
+    | n when n > 0 -> 1
+    | 0 ->
+        match compare (asList h1) (asList h2) with
+        | n when n < 0 -> -1
+        | n when n > 0 -> 1
+        | 0 -> 0
 
-let day7a (hands: Bid list) =
+let day7a (bids: Bid list) =
+    List.sortWith (fun (h1, _) (h2, _) -> compareHand h1 h2) bids
+    |> List.mapi (fun ix (_, bid) -> (ix+1) * bid)
+    |> List.sum
     
-    42

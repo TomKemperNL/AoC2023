@@ -24,6 +24,13 @@ let categoriseHands () =
     Assert.AreEqual(OnePair, categoriseHand (King, King, Four, Jack, Ace))
     Assert.AreEqual(HighCard, categoriseHand (King, Three, Four, Jack, Ace))
 
+[<Test>]
+let compareHands () =
+    Assert.AreEqual(1, compareHand (Five, Five, Five, Five, Five) (Five, Five, Four, Five, Five))
+    Assert.AreEqual(1, compareHand (Five, Five, Three, Three, Three) (Five, Five, Two, Two, Two))
+    Assert.AreEqual(-1, compareHand (Two, Three, Four, Five, Six) (Six, Five, Four, Three, Two))
+    
+    Assert.AreEqual(1, compareHand (Two, Two, Two, Five, Six) (Six, Six, Four, Four, Two))
     
 
 [<Test>]
@@ -32,6 +39,6 @@ let day7aExampleTest () =
 
 [<Test>]    
 let day7a () =
-    Assert.AreEqual(0, day7a (List.map parse input))
+    Assert.AreEqual(248179786, day7a (List.map parse input))
     
     
