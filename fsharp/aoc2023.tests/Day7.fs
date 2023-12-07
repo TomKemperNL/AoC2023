@@ -40,5 +40,18 @@ let day7aExampleTest () =
 [<Test>]    
 let day7a () =
     Assert.AreEqual(248179786, day7a (List.map parse input))
+
+[<Test>]
+let categoriseHandsWithJokers () =
+    Assert.AreEqual(FiveOfAKind, categoriseHand (Five, Five, Five, Five, Joker))
+    Assert.AreEqual(FourOfAKind, categoriseHand (Five, Five, Four, Joker, Joker))
+    Assert.AreEqual(FullHouse, categoriseHand (King, King, Joker, Four, Four))
     
-    
+
+[<Test>]
+let day7bExampleTest () =
+    Assert.AreEqual(5905, day7b (List.map parseB example))
+
+[<Test>]    
+let day7b () =
+    Assert.AreEqual(247885995, day7b (List.map parseB input))    

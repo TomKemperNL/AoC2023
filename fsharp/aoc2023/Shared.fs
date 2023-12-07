@@ -21,4 +21,10 @@ module Map =
         match Map.tryFind key map with
         | None -> ifNone
         | Some item -> item
-        
+
+module List =
+    let rec replace old replacement lst =
+        match lst with
+        | [] -> []
+        | h :: t when h = old -> replacement :: replace old replacement t
+        | h :: t -> h :: replace old replacement t
