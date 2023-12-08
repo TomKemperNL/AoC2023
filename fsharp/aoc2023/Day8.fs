@@ -1,5 +1,7 @@
 ﻿module aoc2023.Day8
 
+open System.Collections.Concurrent
+open System.Collections.Generic
 open System.Text.RegularExpressions
 open Shared
 
@@ -54,18 +56,26 @@ let parse (input: string list) : DesertMap =
         }   
     | _ -> failwith "cannot parse first 3 lines"
 
-let rec runMoves map instructions (currentPosition: Label) : Label =
-    match Map.find currentPosition map with
-    | Node (_, left, right) ->     
-        match instructions with
-        | [] -> currentPosition
-        | Left :: t ->        
-            runMoves map t left 
-        | Right :: t ->
-            runMoves map t right
-            
-        
-    
+
+type MemoInput = (Map<Label, Node>*Move list*Label)
+let memoMap = ConcurrentDictionary<MemoInput, Label>()
+
+let runMoves map instructions currentPosition =
+    let key = map, instructions, currentPosition
+    if memoMap.ContainsKey(key) then            
+        memoMap[key]        
+    else 
+        let rec runMovesRec map instructions (currentPosition: Label) : Label =
+                    match Map.find currentPosition map with
+                    | Node (_, left, right) ->     
+                        match instructions with
+                        | [] -> currentPosition
+                        | Left :: t ->        
+                            runMovesRec map t left 
+                        | Right :: t ->
+                            runMovesRec map t right
+        let result = runMovesRec map instructions currentPosition
+        memoMap.GetOrAdd(key, result)
 
 let day8a (map: DesertMap) =
     let stepsPerRun : int64 = List.length map.Moves
@@ -96,7 +106,7 @@ let day8b (map: DesertMap) =
     let rec runUntil (positions: pseq<Label>) =
         if isDone positions then 0L
         else
-            let newPositions = PSeq.map (runMoves map.Nodes map.Moves) positions 
+            let newPositions = PSeq.map (runMoves map.Nodes map.Moves) positions            
             1L + (runUntil newPositions)
             
     let runs = runUntil startingPositions            
