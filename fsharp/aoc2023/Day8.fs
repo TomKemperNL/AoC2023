@@ -60,7 +60,7 @@ let parse (input: string list) : DesertMap =
 type MemoInput = (Map<Label, Node>*Move list*Label)
 let memoMap = ConcurrentDictionary<MemoInput, Label>()
 
-let runMoves map instructions currentPosition =
+let runMoves map instructions (currentPosition: Label) =
     let key = map, instructions, currentPosition
     if memoMap.ContainsKey(key) then            
         memoMap[key]        
@@ -89,25 +89,54 @@ let day8a (map: DesertMap) =
     let runs = runUntil (Label.ofString "ZZZ") (Label.ofString "AAA")
     runs * stepsPerRun
     
-    
-open FSharp.Collections.ParallelSeq    
+
+let endsWith char (l: Label) =
+    match l with
+    | (_,_,c) when char = c -> true
+    | _ -> false
+        
 let day8b (map: DesertMap) =
     let stepsPerRun : int64 = List.length map.Moves
-    
-    let endsWith char (l: Label) =
-        match l with
-        | (_,_,c) when char = c -> true
-        | _ -> false
         
-    let startingPositions = Seq.filter (endsWith 'A') (Map.keys map.Nodes) |> Seq.toList |> PSeq.ofList
+    let startingPositions = Seq.filter (endsWith 'A') (Map.keys map.Nodes)
+    let endPositions = Seq.filter (endsWith 'Z') (Map.keys map.Nodes)
     let isDone positions =
         Seq.forall (endsWith 'Z') positions
         
-    let rec runUntil (positions: pseq<Label>) =
+    let rec runUntil (positions: Label seq) =
         if isDone positions then 0L
         else
-            let newPositions = PSeq.map (runMoves map.Nodes map.Moves) positions            
+            let newPositions = Seq.map (runMoves map.Nodes map.Moves) positions            
             1L + (runUntil newPositions)
             
     let runs = runUntil startingPositions            
     runs * stepsPerRun
+    
+    
+type SequenceAnalysis = {
+    LoopStart: int
+    LoopLength: int
+    ZsInLoop: int list
+}    
+let analyseMove (map: DesertMap) startPos : SequenceAnalysis = 
+    
+    let rec findLoopRec visited currentPos =
+        match List.exists (fun l -> currentPos = l) visited with
+        | true ->
+            let visitedInOrder = List.rev visited
+            let startOfLoop = List.findIndex (fun l -> currentPos = l) visitedInOrder
+            let loop = List.skip (startOfLoop) visitedInOrder
+            
+            
+            //Loop gevonden
+            {
+                LoopStart = startOfLoop
+                LoopLength = List.length loop
+                ZsInLoop = List.findIndexes (endsWith 'Z') loop
+            }
+        | false ->
+            let visited = currentPos :: visited
+            let newPos = runMoves map.Nodes map.Moves currentPos
+            findLoopRec visited newPos
+            
+    findLoopRec [] startPos

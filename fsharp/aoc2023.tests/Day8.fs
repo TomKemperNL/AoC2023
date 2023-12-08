@@ -56,7 +56,39 @@ XXX = (XXX, XXX)""".Split("\n") |> List.ofArray
 let day8bExampleTest () =
     Assert.AreEqual(6, day8b (parse exampleB))
     
+[<Test>]
+let analysiseExampleTest () =
+    let map = parse exampleB
+    let result1 = analyseMove map ('1','1','A')
+    Assert.AreEqual({
+        LoopStart = 1
+        LoopLength = 1
+        ZsInLoop = [0] 
+    }, result1)
+    let result2 = analyseMove map ('2','2','A')
+    Assert.AreEqual({
+        LoopStart = 1
+        LoopLength = 3
+        ZsInLoop = [2] 
+    }, result2) 
+    ()
 
 [<Test>]
+let day8BExlore () =
+    let map = parse input
+    let startingPositions = Seq.filter (endsWith 'A') (Map.keys map.Nodes)
+    let endPositions = Seq.filter (endsWith 'Z') (Map.keys map.Nodes)
+    
+    let analysis = Seq.map (analyseMove map) startingPositions
+    
+    //OK dus
+    //61 * 43 * 67 * 73 * 79 * 59
+// * 263
+    //15726453850399
+    ()
+
+// [<Test>]
 let day8b () =
-    Assert.AreEqual(6, day8b (parse input))    
+    Assert.AreEqual(6, day8b (parse input))
+    
+    

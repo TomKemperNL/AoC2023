@@ -28,3 +28,14 @@ module List =
         | [] -> []
         | h :: t when h = old -> replacement :: replace old replacement t
         | h :: t -> h :: replace old replacement t
+        
+    let rec findIndexes pred lst =
+        let rec findRec currentIndex items =
+            match items with
+            | [] -> []
+            | h :: t when pred h ->
+                currentIndex :: findRec (currentIndex + 1) t
+            | _ :: t ->
+                findRec (currentIndex + 1) t
+                
+        findRec 0 lst
