@@ -15,4 +15,13 @@ let day9aExampleTest () =
 
 [<Test>]
 let day9aTest () =
-    Assert.AreEqual(1772145754L, day9a (parse input))    
+    Assert.AreEqual(1772145754L, day9a (parse input))
+    
+[<Test>]
+let day9bExampleTest () =
+    Assert.AreEqual(2, day9b (parse example))
+    
+
+[<Test>]
+let day9bTest () =
+    Assert.AreEqual(867, day9b (parse input))    
