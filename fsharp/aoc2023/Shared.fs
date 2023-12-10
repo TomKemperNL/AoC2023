@@ -1,5 +1,6 @@
 ﻿module aoc2023.Shared
 
+open System
 open System.Text.RegularExpressions
 
 // ParseRegex parses a regular expression and returns a list of the strings that match each group in
@@ -16,11 +17,16 @@ let (|ParseRegex|_|) regex str =
 
 let digits = "123456789".ToCharArray() |> List.ofArray
 
+module Pair =
+    let flip (a,b) = (b,a)
+    
 module Map =
     let findOrElse ifNone key map =
         match Map.tryFind key map with
         | None -> ifNone
         | Some item -> item
+    
+    let flip<'A, 'B when 'A : comparison and 'B : comparison> (m: Map<'A, 'B>) = Map.toList m |> List.map (Pair.flip) |> Map.ofList
 
 module List =
     let rec replace old replacement lst =
@@ -39,3 +45,4 @@ module List =
                 findRec (currentIndex + 1) t
                 
         findRec 0 lst
+        
