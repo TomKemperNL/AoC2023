@@ -46,3 +46,6 @@ module List =
                 
         findRec 0 lst
         
+    //performance shmerformance!
+    let intersect l1 l2 =
+        Set.intersect (Set.ofList l1) (Set.ofList l2) |> Set.toList

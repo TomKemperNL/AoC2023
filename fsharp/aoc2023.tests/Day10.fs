@@ -7,8 +7,7 @@ let example1 = """.....
 .S-7.
 .|.|.
 .L-J.
-.....
-"""             .Split("\n") |> List.ofArray
+....."""             .Split("\n") |> List.ofArray
 
 let example2 = """..F7.
 .FJ|.
@@ -17,6 +16,12 @@ SJ.L7
 LJ..."""             .Split("\n") |> List.ofArray
 
 let input = File.ReadLines "./Day10.txt" |> List.ofSeq
+
+
+[<Test>]
+let watFitsBetweenTests () =
+    Assert.AreEqual(Some EW, Pipe.whatFitsBetween (0,0) (-1, 0) (1, 0))
+    Assert.AreEqual(Some EW, Pipe.whatFitsBetween (0,0) (1, 0) (-1, 0))
 
 [<Test>]
 let day10aExample1Test () =
