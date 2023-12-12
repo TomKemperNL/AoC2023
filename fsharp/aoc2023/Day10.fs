@@ -154,20 +154,15 @@ let day10a (map: Maze) =
     match possiblePaths with
     | [pathA; pathB] ->
         
-        let rec keepStepping steps (fromA, posA: int*int, visitedA, fromB, posB: int*int, visitedB) =
-            let newVisitedA = Set.add posA visitedA
-            let newVisitedB = Set.add posB visitedB
+        let rec keepStepping steps (fromA, posA: int*int, fromB, posB: int*int) =
             
-            if visitedA = newVisitedA then failwith "Looping, should always be somewhere new"
-            if visitedB = newVisitedB then failwith "Looping, should always be somewhere new"
-            
-            if Set.contains posB newVisitedA || Set.contains posA newVisitedB then steps
+            if posA = posB then steps
             else
                 let newA : int*int = step map fromA posA
                 let newB : int*int = step map fromB posB
-                keepStepping (1 + steps) (posA, newA, newVisitedA, posB, newB, newVisitedB)
+                keepStepping (1 + steps) (posA, newA, posB, newB)
         
-        keepStepping 1 (map.Start, pathA, Set.singleton map.Start, map.Start, pathB, Set.singleton map.Start)
+        keepStepping 1 (map.Start, pathA, map.Start, pathB)
     | _ ->
         failwith "????"
     
