@@ -53,5 +53,5 @@ let day10aExample2Test () =
 
 [<Test>]
 let day10aTest () =
-    Assert.AreEqual(0, day10a (parse input))
+    Assert.AreEqual(6942, day10a (parse input))
     
