@@ -17,12 +17,13 @@ module Pipe =
         | SE -> [(x, y + 1); (x+1, y)]
         | SW -> [(x, y + 1); (x-1, y)]
     
-    let connectsTo (x,y) pipe (tx,ty) =        
-        List.contains (x,y) (exits (tx,ty) pipe)
+    let connectsTo (x,y) pipe (tx,ty) =
+        let exits = (exits (x,y) pipe)
+        List.contains (tx,ty) exits
     
     let whatFitsBetween (x,y) (sx, sy) (dx, dy) : Pipe option =
-        let optionsSource = List.filter (fun p -> connectsTo (sx,sy) p (x,y)) allPieces
-        let optionsTarget = List.filter (fun p -> connectsTo (dx,dy) p (x,y)) allPieces
+        let optionsSource = List.filter (fun p -> connectsTo (x,y) p (sx,sy)) allPieces
+        let optionsTarget = List.filter (fun p -> connectsTo (x,y) p (dx,dy)) allPieces
         let remaining = List.intersect optionsSource optionsTarget
         match remaining with
         | [] -> None
@@ -58,33 +59,37 @@ type Maze = {
     Start : (int*int)
 }
 
+module Maze =
+    let get maze (x,y) =
+        maze.Maze[y][x]
 
-let neighbours (x,y) =
+let neighbours width height (x,y) =
     [(x-1,y); (x+1,y); (x, y-1); (x, y + 1)]
-    |> List.filter (fun (x,y) -> x > 0 && y > 0)
-
+    |> List.filter (fun (x,y) -> x >= 0 && y >= 0)
+    |> List.filter (fun (x,y) -> x < width && y < height)
 
 let replaceStart (parsedMaze: ParsedMaze) : Maze =
+    let height = parsedMaze.Maze.Length
+    let width = parsedMaze.Maze[0].Length
+    
     let grabPipe ((x,y): int*int, t: ParsingTile) : ((int*int)*Pipe) option =
         match t with
         | Tile (Pipe p) -> Some ((x,y),p)
         | _ -> None
     
-    let nbs = neighbours parsedMaze.Start
+    let nbs = neighbours width height parsedMaze.Start
               |> List.map (fun (x,y) -> (x,y), parsedMaze.Maze[y][x])
-              |> List.map grabPipe 
-              |> List.choose id
-              |> List.filter (fun ((nbx,nby), p) -> Pipe.connectsTo (nbx, nby) p parsedMaze.Start)
-              |> List.map fst   
+    let nbsPipes = nbs |> List.map grabPipe 
+                    |> List.choose id
+    let connectingPipes = nbsPipes                
+                          |> List.filter (fun ((nbx,nby), p) -> Pipe.connectsTo (nbx, nby) p parsedMaze.Start)
+                          |> List.map fst   
               
-    match nbs with
+    match connectingPipes with
     | [a;b] ->
         let startPipe = Pipe.whatFitsBetween parsedMaze.Start a b
         match startPipe with
         | Some p ->
-            let height = parsedMaze.Maze.Length
-            let width = parsedMaze.Maze[0].Length
-            
             let toTile (x,y) : Tile =
                 match parsedMaze.Maze[y][x] with
                 | Tile t -> t
@@ -129,7 +134,41 @@ let parse lines : Maze =
         Maze = List.map List.toArray parsedTiles |> List.toArray
     }
 
+let possibleSteps (map: Maze) (x, y) =
+    match map.Maze[y][x] with
+    | Empty -> []
+    | Pipe p ->
+        Pipe.exits (x,y) p
+
+let step (map: Maze) from (x,y) =
+    match possibleSteps map (x,y) with
+    | [] -> failwith "no possible steps, did we exit the circuit somewhere?"
+    | [d] when d = from -> failwith "dead end, not possible?"
+    | [a; b] when a = from -> b
+    | [a; b] when b = from -> a
+    | _ -> failwith "no idea..."
+
 let day10a (map: Maze) =
-    42
+    
+    let possiblePaths = possibleSteps map map.Start
+    match possiblePaths with
+    | [pathA; pathB] ->
+        
+        let rec keepStepping (fromA, posA: int*int, visitedA, fromB, posB: int*int, visitedB) =
+            let newVisitedA = Set.add posA visitedA
+            let newVisitedB = Set.add posB visitedB
+            
+            if Set.contains posB newVisitedA || Set.contains posA newVisitedB then 0
+            else
+                let newA : int*int = step map fromA posA
+                let newB : int*int = step map fromB posB
+                1 + keepStepping (posA, newA, newVisitedA, posB, newB, newVisitedB)
+        
+        1 + keepStepping (map.Start, pathA, Set.singleton map.Start, map.Start, pathB, Set.singleton map.Start)
+    | _ ->
+        failwith "????"
+    
+    
+    
     
 let day10b = day10a    
