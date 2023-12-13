@@ -4,25 +4,42 @@
 open System.IO
 open NUnit.Framework
 
-let example = """0 3 6 9 12 15
-1 3 6 10 15 21
-10 13 16 21 30 45""".Split("\n") |> List.ofArray
+let example = """???.### 1,1,3
+.??..??...?##. 1,1,3
+?#?#?#?#?#?#?#? 1,3,1,6
+????.#...#... 4,1,1
+????.######..#####. 1,6,5
+?###???????? 3,2,1""".Split("\n") |> List.ofArray
 
-let input = File.ReadLines "./Day9.txt" |> List.ofSeq
+let input = File.ReadLines "./Day12.txt" |> List.ofSeq
+
+[<Test>]
+let backFillTests () =
+    let records = parse example
+    backFillUnknowns 3 (List.head records).Gears
+
+[<Test>]
+let day12aPermutationTest () =
+    let records = parse example
+    
+    Assert.AreEqual(1, arrangements (List.head records) |> List.length)
+    
 
 [<Test>]
 let day12aExampleTest () =
-    Assert.AreEqual(114, day12a (parse example))
+    Assert.AreEqual(21, day12a (parse example))
 
 [<Test>]
 let day12aTest () =
-    Assert.AreEqual(1772145754L, day12a (parse input))
+    Assert.AreEqual(0, day12a (parse input))
     
-[<Test>]
-let day12bExampleTest () =
-    Assert.AreEqual(2, day12b (parse example))
     
-
-[<Test>]
-let day12bTest () =
-    Assert.AreEqual(867, day12b (parse input))    
+//     
+// [<Test>]
+// let day12bExampleTest () =
+//     Assert.AreEqual(2, day12b (parse example))
+//     
+//
+// [<Test>]
+// let day12bTest () =
+//     Assert.AreEqual(867, day12b (parse input))    
