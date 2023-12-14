@@ -16,19 +16,35 @@ let input = File.ReadLines "./Day12.txt" |> List.ofSeq
 [<Test>]
 let backFillTests () =
     let records = parse example
-    Assert.AreEqual(2, generatePossibleSolutionsBackfill 1 [Unknown; Unknown] |> List.length)
-    Assert.AreEqual(0, generatePossibleSolutionsBackfill 1 [Gear Operational; Gear Operational] |> List.length)
-    Assert.AreEqual(1, generatePossibleSolutionsBackfill 1 [Gear Damaged; Gear Operational] |> List.length)
+    Assert.AreEqual(2, generatePossibleSolutionsBackfill true 1 [Unknown; Unknown] |> List.length)
+    Assert.AreEqual(0, generatePossibleSolutionsBackfill true 1 [Gear Operational; Gear Operational] |> List.length)
+    Assert.AreEqual(1, generatePossibleSolutionsBackfill true 1 [Gear Damaged; Gear Operational] |> List.length)
     
-    Assert.AreEqual(1, generatePossibleSolutionsBackfill 3 (List.head records).Gears |> List.length)
-    Assert.AreEqual(0, generatePossibleSolutionsBackfill 2 (List.head records).Gears |> List.length)
-    Assert.AreEqual(0, generatePossibleSolutionsBackfill 4 (List.head records).Gears |> List.length)
+    Assert.AreEqual(1, generatePossibleSolutionsBackfill true 3 (List.head records).Gears |> List.length)
+    Assert.AreEqual(0, generatePossibleSolutionsBackfill true 2 (List.head records).Gears |> List.length)
+    Assert.AreEqual(0, generatePossibleSolutionsBackfill true 4 (List.head records).Gears |> List.length)
+
+
+
+[<Test>]
+let arrangementsTestContent () =
+    let records = parse example
+    
+    // Assert.AreEqual(1,  arrangements (List.item 0 records) |> List.length)
+    Assert.AreEqual("#.#.###",  arrangements (List.item 0 records) |> List.map toString |> List.head)
+
 
 [<Test>]
 let day12aPermutationTest () =
     let records = parse example
-    let solves = arrangements (List.head records)
-    Assert.AreEqual(1,  solves |> List.length)
+    
+    // Assert.AreEqual(1,  arrangements (List.item 0 records) |> List.length)
+    let ar2 = arrangements (List.item 1 records)
+    Assert.AreEqual(4,  ar2 |> List.length)
+    Assert.AreEqual(1,  arrangements (List.item 2 records) |> List.length)
+    Assert.AreEqual(1,  arrangements (List.item 3 records) |> List.length)
+    Assert.AreEqual(4,  arrangements (List.item 4 records) |> List.length)
+    Assert.AreEqual(10,  arrangements (List.item 5 records) |> List.length)
     
 
 [<Test>]
