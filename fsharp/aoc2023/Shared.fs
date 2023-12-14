@@ -59,3 +59,9 @@ module List =
         
     let repeat n xs =
         List.replicate n xs |> List.concat
+        
+    let rec join (sep: 'a) (xs: 'a list list) : 'a list=
+        match xs with
+        | [] -> []
+        | h ::t ->
+            List.append h (sep :: join sep t)

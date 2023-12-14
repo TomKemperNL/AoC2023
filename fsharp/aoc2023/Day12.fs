@@ -145,7 +145,7 @@ let day12a (records : Record list) =
 let day12b rs:int =
     let fiveTimes r =
         {
-            Gears = List.repeat 5 r.Gears
+            Gears = List.replicate 5 r.Gears |> List.join Unknown
             Damages = List.repeat 5 r.Damages            
         }
     let newRecords = List.map fiveTimes rs

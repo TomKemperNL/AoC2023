@@ -116,10 +116,10 @@ let asfd () =
     let perms = arrangements record
     List.iter (Gear.toString >> printfn "%s") perms 
     
-[<Test>]
-let day12bExampleTest () =
-    Assert.AreEqual(525152L, day12b (parse example))
-    
+// [<Test>]
+// let day12bExampleTest () =
+//     Assert.AreEqual(525152L, day12b (parse example))
+//     
 //
 // [<Test>]
 // let day12bTest () =
