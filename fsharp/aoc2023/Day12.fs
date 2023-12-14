@@ -40,14 +40,17 @@ let forceKnown recordGears =
         | Gear g -> g
     List.map toGear recordGears
 
-let backFillUnknowns contiguousRecords recordGear =
-    
+let generatePossibleSolutionsBackfill contiguousRecords recordGear =
+    let reversed = List.rev recordGear
     let rec walk todo remainingGear isFilling results =
         match todo with
-        | 0 -> results
+        | 0 ->
+            match remainingGear with
+            | Gear Damaged :: _  -> [] //no todos, but the next one is also a damaged gear, so no useful solutions in this branch
+            | _ -> List.map (fun r -> remainingGear, List.rev r) results            
         | _ ->
             match remainingGear with
-            | [] -> failwith "wuuut?"
+            | [] -> [] //still have to replace things, but no gear left, so no useful solutions in this branch
             | Unknown :: t ->
                 if isFilling then
                     let newResults = List.map (fun r -> Gear Damaged :: r) results     
@@ -57,19 +60,35 @@ let backFillUnknowns contiguousRecords recordGear =
                     let notToFill = List.map (fun r -> Gear Operational :: r) results
                     List.concat [walk (todo - 1) t true toFill; walk (todo) t false notToFill ]                
             | Gear Operational :: t ->
-                let newResults = List.map (fun r -> Gear Operational :: r) results
-                walk (todo) t false newResults
+                if isFilling then
+                    []
+                else
+                    let newResults = List.map (fun r -> Gear Operational :: r) results
+                    walk (todo) t false newResults
             | Gear Damaged :: t ->
                 let newResults = List.map (fun r -> Gear Damaged :: r) results
                 walk (todo - 1) t true newResults
     
-    walk contiguousRecords recordGear false [[]]
+    walk contiguousRecords reversed false [[]]
     
 let arrangements (record : Record) : RecordGear list list =
-    let computePermutations permutations dams =
-        List.collect (backFillUnknowns dams) permutations
-    
-    List.fold computePermutations [List.rev record.Gears] (List.rev record.Damages)
+    let rec computePermutations (rem: RecordGear list) dams =
+       match dams with
+       | [] -> [rem]
+       | h :: t ->
+           let partialSolutions = generatePossibleSolutionsBackfill h rem
+           match partialSolutions with
+           | [] -> []
+           | _ ->
+               let expandSolution partial = 
+                   let (rem, solved) = partial
+                   List.map (List.append solved) (computePermutations rem t)
+               List.collect expandSolution partialSolutions
+               
+                   
+               
+           
+    computePermutations record.Gears (List.rev record.Damages)       
     
 let day12a (records : Record list) =
     List.map arrangements records |> List.map List.length |> List.sum

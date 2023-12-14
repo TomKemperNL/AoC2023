@@ -16,13 +16,19 @@ let input = File.ReadLines "./Day12.txt" |> List.ofSeq
 [<Test>]
 let backFillTests () =
     let records = parse example
-    backFillUnknowns 3 (List.head records).Gears
+    Assert.AreEqual(2, generatePossibleSolutionsBackfill 1 [Unknown; Unknown] |> List.length)
+    Assert.AreEqual(0, generatePossibleSolutionsBackfill 1 [Gear Operational; Gear Operational] |> List.length)
+    Assert.AreEqual(1, generatePossibleSolutionsBackfill 1 [Gear Damaged; Gear Operational] |> List.length)
+    
+    Assert.AreEqual(1, generatePossibleSolutionsBackfill 3 (List.head records).Gears |> List.length)
+    Assert.AreEqual(0, generatePossibleSolutionsBackfill 2 (List.head records).Gears |> List.length)
+    Assert.AreEqual(0, generatePossibleSolutionsBackfill 4 (List.head records).Gears |> List.length)
 
 [<Test>]
 let day12aPermutationTest () =
     let records = parse example
-    
-    Assert.AreEqual(1, arrangements (List.head records) |> List.length)
+    let solves = arrangements (List.head records)
+    Assert.AreEqual(1,  solves |> List.length)
     
 
 [<Test>]
