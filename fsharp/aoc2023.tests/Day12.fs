@@ -115,11 +115,11 @@ let asfd () =
     let record = parseLine "?.#???????.?????? 3,1,1,2,1"
     let perms = arrangements record
     List.iter (Gear.toString >> printfn "%s") perms 
-//     
-// [<Test>]
-// let day12bExampleTest () =
-//     Assert.AreEqual(2, day12b (parse example))
-//     
+    
+[<Test>]
+let day12bExampleTest () =
+    Assert.AreEqual(525152L, day12b (parse example))
+    
 //
 // [<Test>]
 // let day12bTest () =

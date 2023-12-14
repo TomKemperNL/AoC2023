@@ -56,3 +56,6 @@ module List =
     
     let none f =
         List.forall (f >> not )
+        
+    let repeat n xs =
+        List.replicate n xs |> List.concat

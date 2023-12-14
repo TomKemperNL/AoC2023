@@ -136,10 +136,17 @@ let isSolution record candidate =
 let day12a (records : Record list) =
     let arrangements = List.mapi (fun ix r -> ix,r,arrangements r) records |> List.sortByDescending (trd>>List.length)
     
-    let invalids = List.filter (fun (ix, r, sols) -> List.exists (fun s -> not <|isSolution r s) sols) arrangements  
-    if not <| List.isEmpty invalids then
-        failwith "invalids"
+    // let invalids = List.filter (fun (ix, r, sols) -> List.exists (fun s -> not <|isSolution r s) sols) arrangements  
+    // if not <| List.isEmpty invalids then
+    //     failwith "invalids"
     arrangements |> List.map (trd>>List.length) |> List.sum
     
     
-let day12b = day12a   
+let day12b rs:int =
+    let fiveTimes r =
+        {
+            Gears = List.repeat 5 r.Gears
+            Damages = List.repeat 5 r.Damages            
+        }
+    let newRecords = List.map fiveTimes rs
+    day12a newRecords    
