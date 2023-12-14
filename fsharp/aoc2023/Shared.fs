@@ -19,6 +19,8 @@ let digits = "123456789".ToCharArray() |> List.ofArray
 
 module Pair =
     let flip (a,b) = (b,a)
+    let map f (a,b) =
+        (f a, f b)
     
 module Map =
     let findOrElse ifNone key map =
@@ -49,3 +51,4 @@ module List =
     //performance shmerformance!
     let intersect l1 l2 =
         Set.intersect (Set.ofList l1) (Set.ofList l2) |> Set.toList
+        

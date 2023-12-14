@@ -24,6 +24,9 @@ module Gear =
                     | '#' -> Damaged
                     | _ -> failwith $"unable to parse %A{c}"
         gears.ToCharArray() |> Array.toList |> List.map parseChar
+    
+    let combine (g1s,g2s) =
+        List.append g1s g2s
 
 type Record = {
     Gears: Gear list
@@ -43,40 +46,42 @@ let parseLine line =
 let rec parse (input: string list) : Record list =
     List.map parseLine input
 
-let generatePossibleSolutionsBackfill isAllowedToStartWithDamaged contiguousRecords recordGear =
+let generatePossibleSolutionsBackfill contiguousRecords recordGear =
     let reversed = List.rev recordGear
-    let rec walk isAllowedToStartWithDamaged todo remainingGear isFilling results =
+    let rec walk todo remainingGear isFilling results =
         match todo with
         | 0 ->
             match remainingGear with
             | Damaged :: _  -> [] //no todos, but the next one is also a damaged gear, so no useful solutions in this branch
-            | _ -> List.map (fun r -> remainingGear, List.rev r) results            
+            | Unknown :: t ->
+                let newResults = List.map (fun r -> Operational :: r) results
+                List.map (fun r -> List.rev t, r) newResults
+            | _ ->                
+                List.map (fun r -> List.rev remainingGear, r) results            
         | _ ->
             match remainingGear with
             | [] -> [] //still have to replace things, but no gear left, so no useful solutions in this branch
             | Unknown :: t ->                
                 if isFilling then
                     let newResults = List.map (fun r -> Damaged :: r) results     
-                    walk true (todo - 1) t true newResults
+                    walk (todo - 1) t true newResults
                 else
-                    if isAllowedToStartWithDamaged then 
-                        let toFill = List.map (fun r -> Damaged :: r) results
-                        let notToFill = List.map (fun r -> Operational :: r) results
-                        List.concat [walk true (todo - 1) t true toFill; walk true (todo) t false notToFill ]
-                    else                        
-                        let notToFill = List.map (fun r -> Operational :: r) results
-                        walk true (todo) t false notToFill
+                
+                    let toFill = List.map (fun r -> Damaged :: r) results
+                    let notToFill = List.map (fun r -> Operational :: r) results
+                    List.concat [walk (todo - 1) t true toFill; walk (todo) t false notToFill ]
+               
             | Operational :: t ->
                 if isFilling then
                     []
                 else
                     let newResults = List.map (fun r -> Operational :: r) results
-                    walk true (todo) t false newResults
+                    walk (todo) t false newResults
             | Damaged :: t ->
                 let newResults = List.map (fun r -> Damaged :: r) results
-                walk true (todo - 1) t true newResults
+                walk (todo - 1) t true newResults
     
-    walk isAllowedToStartWithDamaged contiguousRecords reversed false [[]]
+    walk contiguousRecords reversed false [[]]
 
 
 let rec fillRemainder gears =
@@ -88,21 +93,21 @@ let rec fillRemainder gears =
         | g -> g :: fillRemainder t 
     
 let arrangements (record : Record) : Gear list list =
-    let rec computePermutations isAllowedToStartWithDamaged (rem: Gear list) dams =
+    let rec computePermutations (rem: Gear list) dams =
        match dams with
-       | [] -> [rem]
+       | [] -> [fillRemainder rem]
        | h :: t ->
-           let partialSolutions = generatePossibleSolutionsBackfill isAllowedToStartWithDamaged h rem
+           let partialSolutions = generatePossibleSolutionsBackfill h rem
            match partialSolutions with
            | [] -> []
            | _ ->
-               let expandSolution partial = 
-                   let (rem, solved) = partial
-                   List.map (List.append solved) (computePermutations false rem t)
+               let expandSolution (rem, solved) =
+                   let recurSolutions = computePermutations rem t
+                   List.map (fun rs -> List.append rs solved) recurSolutions
                List.collect expandSolution partialSolutions
            
-    let results = computePermutations true record.Gears (List.rev record.Damages)
-    List.map (fillRemainder >> List.rev) results
+    let results = computePermutations record.Gears (List.rev record.Damages)
+    results |> List.distinct
     
 let day12a (records : Record list) =
     let arrangements = List.map arrangements records 

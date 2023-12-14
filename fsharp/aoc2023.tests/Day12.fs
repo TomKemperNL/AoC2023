@@ -3,6 +3,7 @@
 
 open System.IO
 open NUnit.Framework
+open aoc2023.Shared
 
 let example = """???.### 1,1,3
 .??..??...?##. 1,1,3
@@ -15,32 +16,71 @@ let input = File.ReadLines "./Day12.txt" |> List.ofSeq
 
 [<Test>]
 let backFillTests () =
-    let records = parse example
-    Assert.AreEqual(2, generatePossibleSolutionsBackfill true 1 [Unknown; Unknown] |> List.length)
-    Assert.AreEqual(0, generatePossibleSolutionsBackfill true 1 [Operational; Operational] |> List.length)
-    Assert.AreEqual(1, generatePossibleSolutionsBackfill true 1 [Damaged; Operational] |> List.length)
+    let solutions = generatePossibleSolutionsBackfill 1 (Gear.ofString "??") |> List.map Gear.combine |> List.map Gear.toString
+       
+    Assert.AreEqual(2,  solutions |> List.length)
+    Assert.IsTrue(List.contains ".#" solutions)
+    Assert.IsTrue(List.contains "#." solutions)
     
-    Assert.AreEqual(1, generatePossibleSolutionsBackfill true 3 (List.head records).Gears |> List.length)
-    Assert.AreEqual(0, generatePossibleSolutionsBackfill true 2 (List.head records).Gears |> List.length)
-    Assert.AreEqual(0, generatePossibleSolutionsBackfill true 4 (List.head records).Gears |> List.length)
-
+    Assert.AreEqual(0, generatePossibleSolutionsBackfill 1 (Gear.ofString "..") |> List.length)
+    Assert.AreEqual(1, generatePossibleSolutionsBackfill 1 (Gear.ofString "#.") |> List.length)   
+    
 
 
 [<Test>]
 let testExampleLine1 () =
-    let records = parse example
+    let record = parse example |> List.item 0
+    let rem, solv = generatePossibleSolutionsBackfill 3 (Gear.ofString "???.###") |> List.map (Pair.map Gear.toString) |> List.head    
+    Assert.AreEqual("???.", rem)
+    Assert.AreEqual("###", solv)
+    
+    let solutions = generatePossibleSolutionsBackfill 1 (Gear.ofString "???.") |> List.map (Pair.map Gear.toString)
+    Assert.AreEqual(3, List.length solutions)
+    Assert.IsTrue(List.contains ("?",".#.") solutions)
+    Assert.IsTrue(List.contains ("",".#..") solutions)
+    Assert.IsTrue(List.contains ("","#...") solutions)
+    
+    
+    
     
     // Assert.AreEqual(1,  arrangements (List.item 0 records) |> List.length)
-    Assert.AreEqual("#.#.###",  arrangements (List.item 0 records) |> List.map Gear.toString |> List.head)
+    Assert.AreEqual("#.#.###",  arrangements record |> List.map Gear.toString |> List.head)
 
 [<Test>]
 let testExampleLine2 () =
      let records = parse example
      let ex2 = List.item 1 records
-     let possibilities = generatePossibleSolutionsBackfill true 3 (Gear.ofString ".??..??...?##.")
+     let possibilities = generatePossibleSolutionsBackfill 3 (Gear.ofString ".??..??...?##.")
      Assert.AreEqual(1, List.length possibilities)
-     let result = List.head possibilities
+     let result = List.head possibilities |> Gear.combine
      Assert.AreEqual(".??..??...###.", Gear.toString result)
+     
+
+[<Test>]
+let testExampleLineX () =
+    let solutions = generatePossibleSolutionsBackfill 5 (Gear.ofString "????.######..#####.")
+    Assert.AreEqual(("????.######..", "#####."), solutions.Head |> Pair.map Gear.toString)
+    let solutions = generatePossibleSolutionsBackfill 6 (Gear.ofString "????.######..")
+    Assert.AreEqual(("????.", "######.."), solutions.Head |> Pair.map Gear.toString)
+    let solutions = generatePossibleSolutionsBackfill 1 (Gear.ofString "????.") |> List.map (Pair.map Gear.toString)
+    Assert.AreEqual(4, List.length solutions)
+    Assert.IsTrue(List.contains ("??",".#.") solutions)
+    Assert.IsTrue(List.contains ("?",".#..") solutions)
+    Assert.IsTrue(List.contains ("",".#...") solutions)
+    Assert.IsTrue(List.contains ("","#....") solutions)
+    
+    let r = parseLine "????.######..#####. 1,6,5"
+    let solutions = arrangements r
+    Assert.AreEqual(4, List.length solutions)
+
+[<Test>]
+let wutPermutationTest () =
+    // Assert.AreEqual(1, arrangements (parseLine "? 1") |> List.length)
+    // Assert.AreEqual(2, arrangements (parseLine "?? 1") |> List.length)
+    Assert.AreEqual(3, arrangements (parseLine "??? 1") |> List.length)
+    Assert.AreEqual(4, arrangements (parseLine "???? 1") |> List.length)
+    
+
 
 [<Test>]
 let day12aPermutationTest () =
@@ -61,6 +101,7 @@ let day12aExampleTest () =
 
 [<Test>]
 let day12aTest () =
+    //8144 too high
     Assert.AreEqual(0, day12a (parse input))
     
     
