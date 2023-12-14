@@ -17,8 +17,8 @@ let input = File.ReadLines "./Day12.txt" |> List.ofSeq
 let backFillTests () =
     let records = parse example
     Assert.AreEqual(2, generatePossibleSolutionsBackfill true 1 [Unknown; Unknown] |> List.length)
-    Assert.AreEqual(0, generatePossibleSolutionsBackfill true 1 [Gear Operational; Gear Operational] |> List.length)
-    Assert.AreEqual(1, generatePossibleSolutionsBackfill true 1 [Gear Damaged; Gear Operational] |> List.length)
+    Assert.AreEqual(0, generatePossibleSolutionsBackfill true 1 [Operational; Operational] |> List.length)
+    Assert.AreEqual(1, generatePossibleSolutionsBackfill true 1 [Damaged; Operational] |> List.length)
     
     Assert.AreEqual(1, generatePossibleSolutionsBackfill true 3 (List.head records).Gears |> List.length)
     Assert.AreEqual(0, generatePossibleSolutionsBackfill true 2 (List.head records).Gears |> List.length)
@@ -27,12 +27,20 @@ let backFillTests () =
 
 
 [<Test>]
-let arrangementsTestContent () =
+let testExampleLine1 () =
     let records = parse example
     
     // Assert.AreEqual(1,  arrangements (List.item 0 records) |> List.length)
-    Assert.AreEqual("#.#.###",  arrangements (List.item 0 records) |> List.map toString |> List.head)
+    Assert.AreEqual("#.#.###",  arrangements (List.item 0 records) |> List.map Gear.toString |> List.head)
 
+[<Test>]
+let testExampleLine2 () =
+     let records = parse example
+     let ex2 = List.item 1 records
+     let possibilities = generatePossibleSolutionsBackfill true 3 (Gear.ofString ".??..??...?##.")
+     Assert.AreEqual(1, List.length possibilities)
+     let result = List.head possibilities
+     Assert.AreEqual(".??..??...###.", Gear.toString result)
 
 [<Test>]
 let day12aPermutationTest () =

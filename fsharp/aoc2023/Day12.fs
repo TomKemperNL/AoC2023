@@ -5,35 +5,37 @@ open Shared
 type Gear =
     | Operational
     | Damaged
-
-type RecordGear =
     | Unknown
-    | Gear of Gear
+
+module Gear =        
+    let toString (gears: Gear list) =
+        let toChar g =
+            match g with
+            | Unknown -> '?'
+            | Operational -> '.'
+            | Damaged -> '#'
+        System.String(List.map toChar gears |> List.toArray)
+
+    let ofString (gears: string) =
+        let parseChar c =
+                    match c with
+                    | '?' -> Unknown
+                    | '.' -> Operational
+                    | '#' -> Damaged
+                    | _ -> failwith $"unable to parse %A{c}"
+        gears.ToCharArray() |> Array.toList |> List.map parseChar
 
 type Record = {
-    Gears: RecordGear list
+    Gears: Gear list
     Damages: int list
 }
 
-let toString (gears: RecordGear list) =
-    let toChar g =
-        match g with
-        | Unknown -> '?'
-        | Gear Operational -> '.'
-        | Gear Damaged -> '#'
-    System.String(List.map toChar gears |> List.toArray)
 
 let parseLine line =
         match line with
-        | ParseRegex "(.+) (.+)" [gears; damages] ->
-            let parseChar c =
-                match c with
-                | '?' -> Unknown
-                | '.' -> Gear Operational
-                | '#' -> Gear Damaged
-                | _ -> failwith $"unable to parse %A{c}"
+        | ParseRegex "(.+) (.+)" [gears; damages] ->            
             {
-                Gears = gears.ToCharArray() |> Array.toList |> List.map parseChar
+                Gears = Gear.ofString gears
                 Damages = damages.Split(",") |> Array.toList |> List.map int 
             }
         | _ -> failwith $"unable to parse %s{line}"
@@ -47,31 +49,31 @@ let generatePossibleSolutionsBackfill isAllowedToStartWithDamaged contiguousReco
         match todo with
         | 0 ->
             match remainingGear with
-            | Gear Damaged :: _  -> [] //no todos, but the next one is also a damaged gear, so no useful solutions in this branch
+            | Damaged :: _  -> [] //no todos, but the next one is also a damaged gear, so no useful solutions in this branch
             | _ -> List.map (fun r -> remainingGear, List.rev r) results            
         | _ ->
             match remainingGear with
             | [] -> [] //still have to replace things, but no gear left, so no useful solutions in this branch
             | Unknown :: t ->                
                 if isFilling then
-                    let newResults = List.map (fun r -> Gear Damaged :: r) results     
+                    let newResults = List.map (fun r -> Damaged :: r) results     
                     walk true (todo - 1) t true newResults
                 else
                     if isAllowedToStartWithDamaged then 
-                        let toFill = List.map (fun r -> Gear Damaged :: r) results
-                        let notToFill = List.map (fun r -> Gear Operational :: r) results
+                        let toFill = List.map (fun r -> Damaged :: r) results
+                        let notToFill = List.map (fun r -> Operational :: r) results
                         List.concat [walk true (todo - 1) t true toFill; walk true (todo) t false notToFill ]
                     else                        
-                        let notToFill = List.map (fun r -> Gear Operational :: r) results
+                        let notToFill = List.map (fun r -> Operational :: r) results
                         walk true (todo) t false notToFill
-            | Gear Operational :: t ->
+            | Operational :: t ->
                 if isFilling then
                     []
                 else
-                    let newResults = List.map (fun r -> Gear Operational :: r) results
+                    let newResults = List.map (fun r -> Operational :: r) results
                     walk true (todo) t false newResults
-            | Gear Damaged :: t ->
-                let newResults = List.map (fun r -> Gear Damaged :: r) results
+            | Damaged :: t ->
+                let newResults = List.map (fun r -> Damaged :: r) results
                 walk true (todo - 1) t true newResults
     
     walk isAllowedToStartWithDamaged contiguousRecords reversed false [[]]
@@ -82,11 +84,11 @@ let rec fillRemainder gears =
     | [] -> []
     | h :: t ->
         match h with
-        | Unknown -> Gear Operational :: fillRemainder t
+        | Unknown -> Operational :: fillRemainder t
         | g -> g :: fillRemainder t 
     
-let arrangements (record : Record) : RecordGear list list =
-    let rec computePermutations isAllowedToStartWithDamaged (rem: RecordGear list) dams =
+let arrangements (record : Record) : Gear list list =
+    let rec computePermutations isAllowedToStartWithDamaged (rem: Gear list) dams =
        match dams with
        | [] -> [rem]
        | h :: t ->
