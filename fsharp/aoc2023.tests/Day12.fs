@@ -102,9 +102,19 @@ let day12aExampleTest () =
 [<Test>]
 let day12aTest () =
     //8144 too high
-    Assert.AreEqual(0, day12a (parse input))
-    
-    
+    Assert.AreEqual(7732, day12a (parse input))
+  
+[<Test>]
+let uuuurgh ()=
+    let record = parseLine "????????????# 1,1,1,1"
+    let perms = arrangements record
+    List.iter (Gear.toString >> printfn "%s") perms 
+
+[<Test>]
+let asfd () =
+    let record = parseLine "?.#???????.?????? 3,1,1,2,1"
+    let perms = arrangements record
+    List.iter (Gear.toString >> printfn "%s") perms 
 //     
 // [<Test>]
 // let day12bExampleTest () =

@@ -1,5 +1,6 @@
 ﻿module aoc2023.Day12
 
+open System.Collections.Generic
 open Shared
 
 type Gear =
@@ -95,7 +96,9 @@ let rec fillRemainder gears =
 let arrangements (record : Record) : Gear list list =
     let rec computePermutations (rem: Gear list) dams =
        match dams with
-       | [] -> [fillRemainder rem]
+       | [] ->
+           if List.exists ((=) Damaged) rem then []
+           else [fillRemainder rem]
        | h :: t ->
            let partialSolutions = generatePossibleSolutionsBackfill h rem
            match partialSolutions with
@@ -108,9 +111,35 @@ let arrangements (record : Record) : Gear list list =
            
     let results = computePermutations record.Gears (List.rev record.Damages)
     results |> List.distinct
+
+let isSolution record candidate =
+    let lengthSame =
+        List.length candidate = List.length record.Gears
+    
+    let totalGearsOk =
+        let expected =List.sum record.Damages
+        let found = List.filter ((=) Damaged) candidate |>List.length
+        expected = found
+    //
+    // let rec gearStructureOk candidate damages =
+    //     match damages with
+    //     | [] -> List.none ((=) Damaged) candidate 
+    //     | d :: t ->
+    //         match candidate with
+    //         | [] -> false
+    //         | Unknown :: _ -> failwith "Oi!"
+    //         | Operational :: t ->
+    //             gearStructureOk 
+        
+    List.forall id [lengthSame; totalGearsOk]
     
 let day12a (records : Record list) =
-    let arrangements = List.map arrangements records 
-    arrangements |> List.map List.length |> List.sum
+    let arrangements = List.mapi (fun ix r -> ix,r,arrangements r) records |> List.sortByDescending (trd>>List.length)
+    
+    let invalids = List.filter (fun (ix, r, sols) -> List.exists (fun s -> not <|isSolution r s) sols) arrangements  
+    if not <| List.isEmpty invalids then
+        failwith "invalids"
+    arrangements |> List.map (trd>>List.length) |> List.sum
+    
     
 let day12b = day12a   

@@ -17,6 +17,8 @@ let (|ParseRegex|_|) regex str =
 
 let digits = "123456789".ToCharArray() |> List.ofArray
 
+let trd (_,_,c) = c
+
 module Pair =
     let flip (a,b) = (b,a)
     let map f (a,b) =
@@ -51,4 +53,6 @@ module List =
     //performance shmerformance!
     let intersect l1 l2 =
         Set.intersect (Set.ofList l1) (Set.ofList l2) |> Set.toList
-        
+    
+    let none f =
+        List.forall (f >> not )
